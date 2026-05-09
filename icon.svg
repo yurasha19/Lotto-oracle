@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#020817"/>
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <rect x="80" y="80" width="352" height="352" rx="70" fill="url(#g)" opacity="0.15"/>
+  <text x="256" y="310" font-family="monospace" font-size="200" font-weight="900"
+    text-anchor="middle" fill="url(#g)">⚡</text>
+  <text x="256" y="420" font-family="monospace" font-size="52" font-weight="700"
+    text-anchor="middle" fill="#a78bfa" letter-spacing="4">LOTTO</text>
+</svg>

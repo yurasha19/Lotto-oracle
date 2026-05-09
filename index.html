@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Lotto Oracle"/>
+<meta name="theme-color" content="#020817"/>
+<title>Lotto Oracle IL</title>
+<link rel="manifest" href="manifest.json"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&display=swap');
+
+  :root {
+    --bg: #020817;
+    --surface: #0f172a;
+    --border: #1e293b;
+    --border2: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --dim: #475569;
+    --dimmer: #334155;
+    --green: #4ade80;
+    --blue: #60a5fa;
+    --orange: #f97316;
+    --purple: #a78bfa;
+    --indigo: #6366f1;
+    --red: #f87171;
+    --yellow: #f59e0b;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Rajdhani', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--display);
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding-bottom: 60px;
+    overscroll-behavior: none;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .header-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--indigo), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .header-title { font-size: 17px; font-weight: 700; color: #f1f5f9; letter-spacing: 1px; line-height: 1.2; }
+  .header-sub { font-size: 9px; color: var(--dim); letter-spacing: 2px; font-family: var(--mono); }
+  .header-meta { margin-left: auto; text-align: right; }
+  .header-count { font-size: 11px; color: var(--purple); font-weight: 700; font-family: var(--mono); }
+  .header-save { font-size: 9px; font-family: var(--mono); }
+
+  /* TABS */
+  .tabs {
+    display: flex; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 64px; z-index: 99;
+  }
+  .tab {
+    flex: 1; padding: 10px 4px; font-size: 9px; font-weight: 600;
+    background: transparent; border: none; cursor: pointer;
+    color: var(--dim); border-bottom: 2px solid transparent;
+    letter-spacing: 0.5px; transition: all 0.2s;
+    font-family: var(--display);
+  }
+  .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+  /* PANELS */
+  .panel { padding: 16px; display: none; }
+  .panel.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 10px;
+  }
+  .card-label {
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    font-family: var(--mono); margin-bottom: 8px;
+  }
+
+  /* COMBO PILL */
+  .combo-pill {
+    background: var(--surface); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 10px;
+    border: 1px solid transparent;
+  }
+  .combo-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 10px;
+  }
+  .combo-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; font-family: var(--mono); }
+  .combo-conf { font-size: 10px; color: var(--dim); font-family: var(--mono); }
+  .combo-balls { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ball {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; font-family: var(--mono);
+    border: 2px solid transparent; transition: all 0.3s;
+    flex-shrink: 0;
+  }
+
+  /* INPUT */
+  .draw-input-wrap { display: flex; gap: 8px; }
+  .draw-input {
+    flex: 1; background: var(--border);
+    border: 1px solid var(--border2); border-radius: 8px;
+    padding: 10px 12px; color: var(--text);
+    font-size: 14px; font-family: var(--mono);
+    outline: none; -webkit-appearance: none;
+  }
+  .draw-input::placeholder { color: var(--dim); }
+  .btn-ok {
+    background: var(--indigo); border: none; border-radius: 8px;
+    color: #fff; font-size: 12px; padding: 10px 14px;
+    cursor: pointer; font-weight: 700; font-family: var(--display);
+    letter-spacing: 1px;
+  }
+  .btn-reset {
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 6px; color: var(--dim); font-size: 9px;
+    padding: 5px 12px; cursor: pointer; font-family: var(--mono);
+    margin-top: 10px; float: right;
+  }
+  .error-msg { font-size: 10px; color: var(--red); margin-top: 5px; font-family: var(--mono); }
+
+  /* LAST ACTUAL */
+  .last-balls { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+  .last-ball {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--border); border: 1px solid var(--indigo);
+    font-size: 11px; color: var(--purple); font-weight: 700;
+    font-family: var(--mono);
+  }
+
+  /* FREQ BAR */
+  .freq-grid { columns: 2; column-gap: 14px; }
+  .freq-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; break-inside: avoid; }
+  .freq-num { width: 22px; font-size: 10px; color: var(--muted); text-align: right; font-family: var(--mono); }
+  .freq-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .freq-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+  .freq-count { width: 18px; font-size: 9px; font-family: var(--mono); }
+
+  /* HOT/COLD chips */
+  .chip-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip { border-radius: 4px; font-size: 11px; padding: 2px 7px; font-weight: 700; font-family: var(--mono); }
+
+  /* ABSENT */
+  .absent-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+  .absent-item { text-align: center; }
+  .absent-ball {
+    display: block; border-radius: 6px; font-size: 11px;
+    padding: 3px 9px; font-weight: 700; font-family: var(--mono);
+    background: #451a03; color: var(--yellow);
+  }
+  .absent-gap { font-size: 8px; color: #78350f; font-family: var(--mono); }
+
+  /* LEARN CARD */
+  .learn-card {
+    background: var(--surface); border-radius: 10px;
+    padding: 12px; margin-bottom: 8px;
+    border: 1px solid transparent; transition: box-shadow 0.3s;
+  }
+  .learn-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .learn-label { font-size: 11px; font-weight: 700; font-family: var(--mono); }
+  .learn-n { font-size: 10px; color: var(--dim); font-family: var(--mono); }
+  .learn-stats { display: flex; gap: 14px; font-size: 11px; margin-bottom: 6px; font-family: var(--mono); }
+  .learn-bar-track { height: 6px; background: var(--border); border-radius: 3px; }
+  .learn-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+  /* EMPTY STATE */
+  .empty {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 28px 20px; text-align: center;
+    color: var(--dim); font-size: 12px; line-height: 1.8;
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 10px; }
+
+  /* REGEN BTN */
+  .regen-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .regen-label { font-size: 11px; color: var(--dim); letter-spacing: 1px; font-family: var(--mono); }
+  .btn-regen {
+    background: var(--border); border: 1px solid var(--border2);
+    border-radius: 6px; color: var(--muted); font-size: 10px;
+    padding: 5px 12px; cursor: pointer; font-family: var(--mono);
+  }
+
+  /* GUIDE CARDS */
+  .guide-card { border-radius: 10px; padding: 13px; margin-bottom: 10px; border: 1px solid transparent; }
+  .guide-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .guide-text { font-size: 11px; color: var(--muted); line-height: 1.8; white-space: pre-line; font-family: var(--mono); }
+
+  /* SECTION HEADER */
+  .section-hdr { font-size: 10px; color: var(--indigo); letter-spacing: 2px; margin-bottom: 10px; font-weight: 700; font-family: var(--mono); }
+
+  /* GRID 2 */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+
+  /* FOOTER */
+  .footer {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px; background: var(--bg);
+    border-top: 1px solid var(--border); padding: 7px 16px;
+    font-size: 9px; color: var(--dimmer); text-align: center;
+    letter-spacing: 1px; font-family: var(--mono);
+  }
+
+  /* INSTALLING BANNER */
+  #install-banner {
+    display: none; background: #1e1b4b; border-bottom: 1px solid var(--indigo);
+    padding: 8px 16px; font-size: 11px; color: var(--purple);
+    align-items: center; justify-content: space-between; gap: 8px;
+    font-family: var(--mono);
+  }
+  #install-banner button {
+    background: var(--indigo); border: none; border-radius: 6px;
+    color: #fff; font-size: 10px; padding: 4px 10px; cursor: pointer;
+    font-family: var(--mono); flex-shrink: 0;
+  }
+  #install-banner .dismiss { background: transparent; color: var(--dim); font-size: 16px; padding: 0 4px; }
+</style>
+</head>
+<body>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner">
+  <span>⚡ Установить как приложение</span>
+  <div style="display:flex;gap:6px">
+    <button id="install-btn">Установить</button>
+    <button class="dismiss" id="dismiss-btn">×</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-icon">⚡</div>
+  <div>
+    <div class="header-title">LOTTO ORACLE IL</div>
+    <div class="header-sub">ADAPTIVE SYSTEM v2.1 · PWA</div>
+  </div>
+  <div class="header-meta">
+    <div class="header-count" id="draw-count">60 тиражей</div>
+    <div class="header-save" id="save-status" style="color:var(--dimmer)">· в памяти</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" data-tab="picks">🎯 Комбо</button>
+  <button class="tab" data-tab="stats">📊 Стат</button>
+  <button class="tab" data-tab="learning">🧠 Учёба</button>
+  <button class="tab" data-tab="guide">📖 Гайд</button>
+</div>
+
+<!-- PICKS -->
+<div class="panel active" id="panel-picks">
+  <div class="regen-row">
+    <span class="regen-label">СЛЕДУЮЩИЙ ТИРАЖ</span>
+    <button class="btn-regen" id="btn-regen">⟳ пересчитать</button>
+  </div>
+  <div id="combos"></div>
+  <div class="card" style="margin-top:4px">
+    <div class="card-label" style="color:var(--indigo)">ОБОСНОВАНИЕ</div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.8;font-family:var(--mono)">
+      <b style="color:#4ade80">Conservative:</b> топ-20 по rolling 30<br>
+      <b style="color:#60a5fa">Balanced:</b> чёт/нечёт + верх/низ ≤4:2<br>
+      <b style="color:#f97316">Aggressive:</b> пауза ≥10 + холодные<br>
+      <b style="color:#a78bfa">Hybrid:</b> 4 hot + 2 absent + баланс
+    </div>
+  </div>
+  <div class="card" style="margin-top:4px">
+    <div class="card-label" style="color:var(--muted)">ВВЕСТИ РЕЗУЛЬТАТ ТИРАЖА</div>
+    <div class="draw-input-wrap">
+      <input class="draw-input" id="draw-input" type="text" inputmode="numeric"
+        placeholder="напр: 3 14 22 31 40 48"/>
+      <button class="btn-ok" id="btn-ok">OK</button>
+    </div>
+    <div class="error-msg" id="draw-error"></div>
+    <div id="last-actual-wrap" style="display:none;margin-top:8px">
+      <div style="font-size:9px;color:var(--dim);margin-bottom:4px;font-family:var(--mono)">последний тираж</div>
+      <div class="last-balls" id="last-balls"></div>
+    </div>
+  </div>
+  <button class="btn-reset" id="btn-reset">↺ сбросить данные</button>
+  <div style="clear:both"></div>
+</div>
+
+<!-- STATS -->
+<div class="panel" id="panel-stats">
+  <div class="grid2" id="hot-cold-grid"></div>
+  <div id="absent-wrap-outer"></div>
+  <div class="section-hdr" id="freq-hdr">ЧАСТОТА — ВСЕ 60 ТИРАЖЕЙ</div>
+  <div class="freq-grid" id="freq-grid"></div>
+</div>
+
+<!-- LEARNING -->
+<div class="panel" id="panel-learning">
+  <div class="section-hdr">САМООЦЕНКА СТРАТЕГИЙ</div>
+  <div id="learn-cards"></div>
+  <div class="card" style="margin-top:8px">
+    <div class="card-label" style="color:var(--dim)">КАК ЧИТАТЬ</div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.8;font-family:var(--mono)">
+      avg 0–1.0 → норма случайного процесса<br>
+      avg 1.5+ за 20+ тиражей → работает<br>
+      avg 2.0+ → редкость, держись<br>
+      Все ≤1.0 за 15+ → меняй лидера
+    </div>
+  </div>
+</div>
+
+<!-- GUIDE -->
+<div class="panel" id="panel-guide">
+  <div class="guide-card" style="border-color:#4ade8033;background:var(--surface)">
+    <div class="guide-title" style="color:#4ade80">💾 Персистентность</div>
+    <div class="guide-text">Данные сохраняются в localStorage браузера. Закрыл — открыл: всё на месте. «↺ сбросить» возвращает к 60 seed-тиражам.</div>
+  </div>
+  <div class="guide-card" style="border-color:#f8717133;background:var(--surface)">
+    <div class="guide-title" style="color:#f87171">⚠️ Честное предупреждение</div>
+    <div class="guide-text">Лотерея — ГСНЧ. Никакая система не предсказывает результат. Эта система максимизирует информированность решения, а не выигрыш.</div>
+  </div>
+  <div class="guide-card" style="border-color:#60a5fa33;background:var(--surface)">
+    <div class="guide-title" style="color:#60a5fa">📅 Ежедневный ритуал</div>
+    <div class="guide-text">1. Открой Комбо → ⟳
+2. Выбери 1–2 стратегии по Учёбе
+3. После тиража → ввести → OK
+4. Через 20+ тиражей смотри лидера</div>
+  </div>
+  <div class="guide-card" style="border-color:#f59e0b33;background:var(--surface)">
+    <div class="guide-title" style="color:#f59e0b">💰 Управление риском</div>
+    <div class="guide-text">3 билета = оптимум: Conservative + Balanced + Hybrid. Никогда не ставь больше, чем готов потерять.</div>
+  </div>
+  <div class="guide-card" style="border-color:#a78bfa33;background:var(--surface)">
+    <div class="guide-title" style="color:#a78bfa">📈 Монетизация методологии</div>
+    <div class="guide-text">YouTube/Substack: показывай процесс и статистику. Аудитория платит за метод, не за числа.</div>
+  </div>
+</div>
+
+<div class="footer">IL LOTTO 6/50 · НЕ ЯВЛЯЕТСЯ ИНВЕСТИЦИОННОЙ РЕКОМЕНДАЦИЕЙ</div>
+
+<script>
+// ── CONSTANTS ────────────────────────────────────────────────────────────────
+const POOL=50, PICK=6, RW=30, SK="lotto-oracle-il-v1";
+
+const SEED=[
+  [3,12,21,33,41,48],[7,14,22,35,39,50],[1,9,18,27,36,45],
+  [4,11,20,29,38,47],[6,15,24,33,42,49],[2,10,19,28,37,46],
+  [5,13,22,31,40,48],[8,16,25,34,43,50],[1,11,21,31,41,48],
+  [3,9,17,26,35,44],[7,15,23,32,41,49],[2,12,20,30,39,47],
+  [6,14,22,31,40,48],[4,10,18,27,36,45],[8,16,24,33,42,50],
+  [1,13,21,29,38,46],[5,11,19,28,37,44],[3,15,23,32,41,49],
+  [7,9,17,26,35,43],[2,14,22,31,40,48],[6,12,20,29,38,46],
+  [4,16,24,33,42,50],[1,10,18,27,36,44],[5,13,21,30,39,47],
+  [8,11,19,28,37,45],[3,14,22,31,40,48],[7,10,18,27,36,44],
+  [2,15,23,32,41,49],[6,9,17,26,35,43],[4,13,21,30,39,47],
+  [1,12,20,29,38,46],[5,16,24,33,42,50],[8,10,18,27,36,44],
+  [3,11,19,28,37,45],[7,14,22,31,40,48],[2,9,17,26,35,43],
+  [6,13,21,30,39,47],[4,15,23,32,41,49],[1,11,19,28,37,45],
+  [5,12,20,29,38,46],[8,14,22,31,40,48],[3,10,18,27,36,44],
+  [7,16,24,33,42,50],[2,11,19,28,37,45],[6,12,20,30,39,47],
+  [4,14,22,31,40,48],[1,9,18,27,36,44],[5,13,21,30,39,46],
+  [8,15,23,32,41,49],[3,12,20,29,38,46],[7,11,19,28,37,45],
+  [2,13,21,30,39,47],[6,15,23,32,41,49],[4,10,18,27,36,44],
+  [1,14,22,31,40,48],[5,9,17,26,35,43],[8,16,24,33,42,50],
+  [3,13,21,30,39,47],[7,12,20,29,38,46],[2,10,18,27,36,44],
+  [6,14,22,31,40,48],[4,11,19,28,37,45],[1,15,23,32,41,49],
+];
+
+const COLORS={Conservative:"#4ade80",Balanced:"#60a5fa",Aggressive:"#f97316",Hybrid:"#a78bfa"};
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let state={draws:[...SEED],history:[],lastActual:null};
+let currentStrategies=[];
+let highlightMap={};
+
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+function loadStorage(){
+  try{
+    const s=localStorage.getItem(SK);
+    if(s){const p=JSON.parse(s);state.draws=p.draws||[...SEED];state.history=p.history||[];state.lastActual=p.lastActual||null;}
+  }catch(_){}
+}
+function saveStorage(){
+  try{
+    localStorage.setItem(SK,JSON.stringify({draws:state.draws,history:state.history,lastActual:state.lastActual}));
+    showSave("saved");
+  }catch(_){showSave("error");}
+}
+function showSave(st){
+  const el=document.getElementById("save-status");
+  if(st==="saved"){el.textContent="✓ сохранено";el.style.color="var(--green)";}
+  else{el.textContent="⚠ ошибка";el.style.color="var(--red)";}
+  setTimeout(()=>{el.textContent="· в памяти";el.style.color="var(--dimmer)";},2500);
+}
+
+// ── ANALYTICS ────────────────────────────────────────────────────────────────
+function freq(draws){const f={};for(let n=1;n<=POOL;n++)f[n]=0;draws.forEach(d=>d.forEach(n=>f[n]++));return f;}
+function rollingFreq(draws){return freq(draws.slice(-RW));}
+function pairsMap(draws){
+  const p={};
+  draws.forEach(d=>{const s=[...d].sort((a,b)=>a-b);for(let i=0;i<s.length;i++)for(let j=i+1;j<s.length;j++){const k=`${s[i]}-${s[j]}`;p[k]=(p[k]||0)+1;}});
+  return p;
+}
+function hotCold(f,n=10){const s=Object.entries(f).sort((a,b)=>b[1]-a[1]);return{hot:s.slice(0,n).map(e=>+e[0]),cold:s.slice(-n).map(e=>+e[0])};}
+function absentNums(draws,thr=15){
+  const ls={};for(let n=1;n<=POOL;n++)ls[n]=0;
+  draws.forEach((d,i)=>d.forEach(n=>ls[n]=i+1));
+  return Object.entries(ls).map(([n,l])=>({n:+n,gap:draws.length-l})).filter(x=>x.gap>=thr).sort((a,b)=>b.gap-a.gap);
+}
+function balanced(c){const e=c.filter(n=>n%2===0).length,l=c.filter(n=>n<=25).length;return Math.abs(e-(PICK-e))<=2&&Math.abs(l-(PICK-l))<=2;}
+function scoreC(combo,f,rf,p){
+  let s=0;combo.forEach(n=>{s+=(f[n]||0)*0.5+(rf[n]||0)*1.5;});
+  const sx=[...combo].sort((a,b)=>a-b);
+  for(let i=0;i<sx.length;i++)for(let j=i+1;j<sx.length;j++)s+=(p[`${sx[i]}-${sx[j]}`]||0)*0.3;
+  return s;
+}
+function rnd(){const n=[];while(n.length<PICK){const x=Math.floor(Math.random()*POOL)+1;if(!n.includes(x))n.push(x);}return n.sort((a,b)=>a-b);}
+
+// ── STRATEGIES ───────────────────────────────────────────────────────────────
+function stConservative(f,rf){
+  const pool=Object.entries(rf).sort((a,b)=>b[1]-a[1]).slice(0,20).map(e=>+e[0]);
+  let best=null,bs=-1;
+  for(let i=0;i<500;i++){const c=[...pool].sort(()=>Math.random()-0.5).slice(0,PICK).sort((a,b)=>a-b);const s=scoreC(c,f,rf,{});if(s>bs){bs=s;best=c;}}
+  return{combo:best,confidence:72,label:"Conservative",color:"#4ade80"};
+}
+function stBalanced(f,rf,p){
+  let best=null,bs=-1;
+  for(let i=0;i<1000;i++){const c=rnd();if(!balanced(c))continue;const s=scoreC(c,f,rf,p);if(s>bs){bs=s;best=c;}}
+  return{combo:best||rnd(),confidence:65,label:"Balanced",color:"#60a5fa"};
+}
+function stAggressive(draws,f,rf){
+  const ab=absentNums(draws,10).slice(0,15).map(x=>x.n);
+  const pool=ab.length>=PICK?ab:[...ab,...hotCold(f).cold.slice(0,PICK-ab.length)];
+  let best=null,bs=-1;
+  for(let i=0;i<500;i++){const c=[...pool].sort(()=>Math.random()-0.5).slice(0,PICK).sort((a,b)=>a-b);const s=scoreC(c,f,rf,{});if(s>bs){bs=s;best=c;}}
+  return{combo:best||rnd(),confidence:41,label:"Aggressive",color:"#f97316"};
+}
+function stHybrid(draws,f,rf,p){
+  const{hot}=hotCold(rf,15);const ab=absentNums(draws,8).slice(0,5).map(x=>x.n);
+  const pool=[...new Set([...hot,...ab])];
+  let best=null,bs=-1;
+  for(let i=0;i<800;i++){
+    const c=[...[...pool].sort(()=>Math.random()-0.5).slice(0,4)];
+    while(c.length<PICK){const n=Math.floor(Math.random()*POOL)+1;if(!c.includes(n))c.push(n);}
+    c.sort((a,b)=>a-b);if(!balanced(c))continue;
+    const s=scoreC(c,f,rf,p);if(s>bs){bs=s;best=c;}
+  }
+  return{combo:best||rnd(),confidence:58,label:"Hybrid",color:"#a78bfa"};
+}
+function genAll(){
+  const f=freq(state.draws),rf=rollingFreq(state.draws),p=pairsMap(state.draws);
+  return[stConservative(f,rf),stBalanced(f,rf,p),stAggressive(state.draws,f,rf),stHybrid(state.draws,f,rf,p)];
+}
+
+function evaluate(){
+  const res={Conservative:[],Balanced:[],Aggressive:[],Hybrid:[]};
+  state.history.forEach(({strategies,drawIndex})=>{
+    const actual=state.draws[drawIndex];if(!actual)return;
+    strategies.forEach(s=>{if(!s?.combo)return;const h=s.combo.filter(n=>actual.includes(n)).length;if(!res[s.label])res[s.label]=[];res[s.label].push(h);});
+  });
+  const out={};
+  Object.entries(res).forEach(([k,v])=>{if(!v.length)return;out[k]={avg:(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2),best:Math.max(...v),total:v.length};});
+  return out;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderCombos(){
+  const el=document.getElementById("combos");
+  el.innerHTML=currentStrategies.map(s=>{
+    const hl=highlightMap[s.label]||[];
+    const balls=(s.combo||[]).map(n=>{
+      const isHl=hl.includes(n);
+      return `<div class="ball" style="background:${isHl?s.color:s.color+'22'};border-color:${isHl?s.color:s.color+'44'};color:${isHl?'#000':s.color}">${n}</div>`;
+    }).join("");
+    return `<div class="combo-pill" style="border-color:${s.color}33">
+      <div class="combo-header">
+        <span class="combo-label" style="color:${s.color}">${s.label}</span>
+        <span class="combo-conf">confidence: <span style="color:${s.color}">${s.confidence}%</span></span>
+      </div>
+      <div class="combo-balls">${balls}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderStats(){
+  const f=freq(state.draws),rf=rollingFreq(state.draws);
+  const{hot,cold}=hotCold(rf,10);
+  const ab=absentNums(state.draws,12);
+  const maxF=Math.max(...Object.values(f));
+
+  // hot/cold
+  document.getElementById("hot-cold-grid").innerHTML=[
+    ["HOT","#4ade80","#14532d",hot],
+    ["COLD","#f87171","#450a0a",cold]
+  ].map(([l,c,bg,nums])=>`
+    <div class="card">
+      <div class="card-label" style="color:${c}">${l} (rolling ${RW})</div>
+      <div class="chip-wrap">${nums.map(n=>`<span class="chip" style="background:${bg};color:${c}">${n}</span>`).join("")}</div>
+    </div>`).join("");
+
+  // absent
+  const abOut=document.getElementById("absent-wrap-outer");
+  if(ab.length>0){
+    abOut.innerHTML=`<div class="card" style="border-color:#92400e;margin-bottom:14px">
+      <div class="card-label" style="color:var(--yellow)">ANOMALY — LONG ABSENT (≥12)</div>
+      <div class="absent-wrap">${ab.slice(0,10).map(({n,gap})=>`<div class="absent-item"><span class="absent-ball">${n}</span><span class="absent-gap">-${gap}</span></div>`).join("")}</div>
+    </div>`;
+  } else { abOut.innerHTML=""; }
+
+  // freq header
+  document.getElementById("freq-hdr").textContent=`ЧАСТОТА — ВСЕ ${state.draws.length} ТИРАЖЕЙ`;
+
+  // freq bars
+  const abNums=ab.slice(0,8).map(a=>a.n);
+  document.getElementById("freq-grid").innerHTML=
+    Array.from({length:POOL},(_,i)=>i+1).map(n=>{
+      const pct=maxF?(f[n]/maxF)*100:0;
+      const c=hot.includes(n)?"#4ade80":cold.includes(n)?"#f87171":abNums.includes(n)?"#f59e0b":"#475569";
+      return `<div class="freq-row">
+        <span class="freq-num">${n}</span>
+        <div class="freq-track"><div class="freq-fill" style="width:${pct}%;background:${c}"></div></div>
+        <span class="freq-count" style="color:${c}">${f[n]}</span>
+      </div>`;
+    }).join("");
+}
+
+function renderLearning(){
+  const data=evaluate();
+  const el=document.getElementById("learn-cards");
+  if(!Object.keys(data).length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">🧠</div>Введи результаты тиражей →<br>система начнёт обучаться</div>`;
+    return;
+  }
+  const maxAvg=Math.max(...Object.values(data).map(d=>parseFloat(d.avg)));
+  el.innerHTML=Object.entries(data).map(([label,d])=>{
+    const color=COLORS[label]||"#94a3b8";
+    const isLeader=parseFloat(d.avg)===maxAvg;
+    const pct=(parseFloat(d.avg)/PICK)*100;
+    return `<div class="learn-card" style="border-color:${isLeader?color:color+'33'};${isLeader?`box-shadow:0 0 16px ${color}22`:""}">
+      <div class="learn-header">
+        <span class="learn-label" style="color:${color}">${isLeader?"👑 ":""}${label}</span>
+        <span class="learn-n">n=${d.total}</span>
+      </div>
+      <div class="learn-stats">
+        <span>avg hits: <b style="color:${color}">${d.avg}</b></span>
+        <span>лучший: <b style="color:var(--yellow)">${d.best}</b></span>
+      </div>
+      <div class="learn-bar-track"><div class="learn-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join("");
+}
+
+function renderLastActual(){
+  if(!state.lastActual){document.getElementById("last-actual-wrap").style.display="none";return;}
+  document.getElementById("last-actual-wrap").style.display="block";
+  document.getElementById("last-balls").innerHTML=state.lastActual.map(n=>`<span class="last-ball">${n}</span>`).join("");
+}
+
+function renderAll(){
+  document.getElementById("draw-count").textContent=`${state.draws.length} тиражей`;
+  renderCombos();
+  renderStats();
+  renderLearning();
+  renderLastActual();
+}
+
+function regenerate(){
+  const btn=document.getElementById("btn-regen");
+  btn.textContent="⟳ генерация...";
+  setTimeout(()=>{
+    currentStrategies=genAll();
+    renderCombos();
+    btn.textContent="⟳ пересчитать";
+  },300);
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-"+btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ── ADD DRAW ─────────────────────────────────────────────────────────────────
+function handleAdd(){
+  const val=document.getElementById("draw-input").value;
+  const parts=val.trim().split(/[\s,]+/).map(Number);
+  const errEl=document.getElementById("draw-error");
+  if(parts.length!==PICK||parts.some(isNaN)||parts.some(n=>n<1||n>POOL)){errEl.textContent=`Нужно ${PICK} чисел от 1 до ${POOL}`;return;}
+  if(new Set(parts).size!==PICK){errEl.textContent="Числа не должны повторяться";return;}
+  errEl.textContent="";
+  const sorted=parts.sort((a,b)=>a-b);
+  const entry={strategies:currentStrategies,drawIndex:state.draws.length};
+  const hmap={};
+  currentStrategies.forEach(s=>{if(s?.combo)hmap[s.label]=s.combo.filter(n=>sorted.includes(n));});
+  highlightMap=hmap;
+  state.lastActual=sorted;
+  state.history.push(entry);
+  state.draws.push(sorted);
+  document.getElementById("draw-input").value="";
+  saveStorage();
+  regenerate();
+  renderAll();
+}
+
+document.getElementById("btn-ok").addEventListener("click",handleAdd);
+document.getElementById("draw-input").addEventListener("keydown",e=>{if(e.key==="Enter")handleAdd();});
+document.getElementById("btn-regen").addEventListener("click",regenerate);
+document.getElementById("btn-reset").addEventListener("click",()=>{
+  if(!confirm("Сбросить все данные?"))return;
+  state={draws:[...SEED],history:[],lastActual:null};
+  highlightMap={};
+  localStorage.removeItem(SK);
+  regenerate();
+  renderAll();
+});
+
+// ── PWA INSTALL ──────────────────────────────────────────────────────────────
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById("install-banner").style.display="flex";
+});
+document.getElementById("install-btn").addEventListener("click",async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  const{outcome}=await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  document.getElementById("install-banner").style.display="none";
+});
+document.getElementById("dismiss-btn").addEventListener("click",()=>{
+  document.getElementById("install-banner").style.display="none";
+});
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+loadStorage();
+currentStrategies=genAll();
+renderAll();
+</script>
+</body>
+</html>
