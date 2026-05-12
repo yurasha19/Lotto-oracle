@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Lotto Oracle"/>
+<meta name="theme-color" content="#020817"/>
+<title>Lotto Oracle IL v3</title>
+<link rel="manifest" href="manifest.json"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#020817;--surface:#0f172a;--border:#1e293b;--border2:#334155;
+  --text:#e2e8f0;--muted:#94a3b8;--dim:#475569;--dimmer:#1e293b;
+  --green:#4ade80;--blue:#60a5fa;--orange:#f97316;
+  --purple:#a78bfa;--indigo:#6366f1;--red:#f87171;--yellow:#f59e0b;
+  --mono:'Share Tech Mono',monospace;--ui:'Rajdhani',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{background:var(--bg);color:var(--text);font-family:var(--ui);
+  max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:64px}
+
+.hdr{background:linear-gradient(135deg,#0c1120,#1a1640);padding:14px 16px 12px;
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;
+  display:flex;align-items:center;gap:10px}
+.hdr-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--indigo),var(--purple));
+  display:flex;align-items:center;justify-content:center;font-size:18px}
+.hdr-title{font-size:16px;font-weight:700;color:#f1f5f9;letter-spacing:1px}
+.hdr-sub{font-size:9px;color:var(--dim);letter-spacing:2px;font-family:var(--mono)}
+.hdr-right{margin-left:auto;text-align:right}
+.hdr-count{font-size:11px;color:var(--purple);font-weight:700;font-family:var(--mono)}
+.hdr-save{font-size:9px;font-family:var(--mono);transition:color .3s}
+
+#install-banner{display:none;background:#1a1640;border-bottom:1px solid var(--indigo);
+  padding:8px 16px;font-size:11px;color:var(--purple);
+  align-items:center;justify-content:space-between;gap:8px;font-family:var(--mono)}
+#install-banner button{background:var(--indigo);border:none;border-radius:6px;
+  color:#fff;font-size:10px;padding:4px 10px;cursor:pointer;font-family:var(--mono);flex-shrink:0}
+.xbtn{background:transparent!important;color:var(--dim)!important;font-size:18px!important;padding:0 4px!important}
+
+#fetch-bar{background:#0a1628;border-bottom:1px solid var(--border);
+  padding:7px 16px;display:flex;align-items:center;gap:8px}
+.fetch-info{font-size:10px;font-family:var(--mono);flex:1;color:var(--dim)}
+.btn-fetch{background:var(--surface);border:1px solid var(--border2);border-radius:6px;
+  color:var(--muted);font-size:10px;padding:5px 10px;cursor:pointer;font-family:var(--mono);flex-shrink:0}
+.btn-fetch:disabled{opacity:.4;cursor:default}
+
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);
+  position:sticky;top:62px;z-index:199}
+.tab{flex:1;padding:10px 2px;font-size:9px;font-weight:600;background:transparent;
+  border:none;cursor:pointer;color:var(--dim);border-bottom:2px solid transparent;
+  letter-spacing:.5px;transition:all .2s;font-family:var(--ui)}
+.tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+
+.panel{padding:16px;display:none}
+.panel.active{display:block}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.card-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-family:var(--mono);margin-bottom:8px}
+
+.combo-pill{background:var(--surface);border-radius:12px;padding:12px 14px;margin-bottom:10px;border:1px solid transparent}
+.combo-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.combo-label{font-size:11px;font-weight:700;letter-spacing:2px;font-family:var(--mono)}
+.combo-conf{font-size:10px;color:var(--dim);font-family:var(--mono)}
+.combo-balls{display:flex;gap:7px;flex-wrap:wrap}
+.ball{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:13px;font-family:var(--mono);border:2px solid transparent;transition:all .3s;flex-shrink:0}
+
+.regen-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.regen-label{font-size:11px;color:var(--dim);letter-spacing:1px;font-family:var(--mono)}
+.btn-regen{background:var(--surface);border:1px solid var(--border2);border-radius:6px;
+  color:var(--muted);font-size:10px;padding:5px 12px;cursor:pointer;font-family:var(--mono)}
+
+.draw-input-wrap{display:flex;gap:8px}
+.draw-input{flex:1;background:var(--border);border:1px solid var(--border2);border-radius:8px;
+  padding:10px 12px;color:var(--text);font-size:14px;font-family:var(--mono);outline:none;-webkit-appearance:none}
+.draw-input::placeholder{color:var(--dim)}
+.draw-input:focus{border-color:var(--indigo)}
+.btn-ok{background:var(--indigo);border:none;border-radius:8px;color:#fff;
+  font-size:12px;padding:10px 14px;cursor:pointer;font-weight:700;font-family:var(--ui);letter-spacing:1px}
+.date-input{margin-top:7px;background:var(--border);border:1px solid var(--border2);border-radius:6px;
+  padding:7px 10px;color:var(--muted);font-size:12px;font-family:var(--mono);outline:none;width:100%;-webkit-appearance:none}
+.date-input:focus{border-color:var(--indigo);color:var(--text)}
+.error-msg{font-size:10px;color:var(--red);margin-top:5px;font-family:var(--mono)}
+.last-ball{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  background:var(--border);border:1px solid var(--indigo);font-size:11px;color:var(--purple);font-weight:700;font-family:var(--mono)}
+
+.hist-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--dimmer)}
+.hist-date{color:var(--dim);width:72px;flex-shrink:0;font-size:10px;font-family:var(--mono)}
+.hist-nums{display:flex;gap:4px;flex-wrap:wrap}
+.hist-num{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;background:var(--border);color:var(--muted);font-family:var(--mono)}
+
+.freq-grid{columns:2;column-gap:14px}
+.freq-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;break-inside:avoid}
+.freq-num{width:22px;font-size:10px;color:var(--muted);text-align:right;font-family:var(--mono)}
+.freq-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.freq-fill{height:100%;border-radius:4px;transition:width .4s}
+.freq-count{width:18px;font-size:9px;font-family:var(--mono)}
+
+.chip-wrap{display:flex;flex-wrap:wrap;gap:4px}
+.chip{border-radius:4px;font-size:11px;padding:2px 7px;font-weight:700;font-family:var(--mono)}
+.absent-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.absent-item{text-align:center}
+.absent-ball{display:block;border-radius:6px;font-size:11px;padding:3px 9px;font-weight:700;font-family:var(--mono);background:#451a03;color:var(--yellow)}
+.absent-gap{font-size:8px;color:#78350f;font-family:var(--mono)}
+
+.learn-card{background:var(--surface);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid transparent;transition:box-shadow .3s}
+.learn-header{display:flex;justify-content:space-between;margin-bottom:6px}
+.learn-label{font-size:11px;font-weight:700;font-family:var(--mono)}
+.learn-n{font-size:10px;color:var(--dim);font-family:var(--mono)}
+.learn-stats{display:flex;gap:14px;font-size:11px;margin-bottom:6px;font-family:var(--mono)}
+.learn-bar{height:6px;background:var(--border);border-radius:3px}
+.learn-fill{height:100%;border-radius:3px;transition:width .5s}
+
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+.chart-title{font-size:10px;color:var(--indigo);letter-spacing:2px;font-family:var(--mono);margin-bottom:10px}
+
+.btn-exp{background:var(--surface);border:1px solid var(--border2);border-radius:6px;
+  color:var(--muted);font-size:10px;padding:6px 12px;cursor:pointer;font-family:var(--mono)}
+.btn-imp{background:var(--surface);border:1px solid var(--indigo);border-radius:6px;
+  color:var(--purple);font-size:10px;padding:6px 12px;cursor:pointer;font-family:var(--mono)}
+.btn-rst{background:transparent;border:1px solid var(--border);border-radius:6px;
+  color:var(--dim);font-size:9px;padding:5px 12px;cursor:pointer;font-family:var(--mono)}
+
+.guide-card{border-radius:10px;padding:13px;margin-bottom:10px;border:1px solid transparent;background:var(--surface)}
+.guide-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.guide-text{font-size:11px;color:var(--muted);line-height:1.8;white-space:pre-line;font-family:var(--mono)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.section-hdr{font-size:10px;color:var(--indigo);letter-spacing:2px;margin-bottom:10px;font-weight:700;font-family:var(--mono)}
+.empty{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:28px 20px;text-align:center;color:var(--dim);font-size:12px;line-height:1.8}
+.empty-icon{font-size:32px;margin-bottom:10px}
+
+.footer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;
+  background:var(--bg);border-top:1px solid var(--border);padding:8px 16px;
+  font-size:9px;color:var(--dimmer);text-align:center;letter-spacing:1px;font-family:var(--mono)}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;animation:spin 1s linear infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<div id="install-banner">
+  <span>⚡ Установить как приложение</span>
+  <div style="display:flex;gap:6px">
+    <button id="btn-install">Установить</button>
+    <button class="xbtn" id="btn-dismiss">×</button>
+  </div>
+</div>
+
+<div class="hdr">
+  <div class="hdr-icon">⚡</div>
+  <div>
+    <div class="hdr-title">LOTTO ORACLE IL</div>
+    <div class="hdr-sub">ADAPTIVE SYSTEM v3.0 · PWA</div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-count" id="draw-count">— тиражей</div>
+    <div class="hdr-save" id="save-status" style="color:var(--dimmer)">· локально</div>
+  </div>
+</div>
+
+<div id="fetch-bar">
+  <div class="fetch-info">IL Lotto: <span id="fetch-info-text">не загружен</span></div>
+  <button class="btn-fetch" id="btn-fetch">↓ обновить</button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="picks">🎯 Комбо</button>
+  <button class="tab" data-tab="stats">📊 Стат</button>
+  <button class="tab" data-tab="history">📋 История</button>
+  <button class="tab" data-tab="learning">🧠 Учёба</button>
+  <button class="tab" data-tab="guide">⚙️ Прочее</button>
+</div>
+
+<!-- PICKS -->
+<div class="panel active" id="panel-picks">
+  <div class="regen-row">
+    <span class="regen-label">СЛЕДУЮЩИЙ ТИРАЖ</span>
+    <button class="btn-regen" id="btn-regen">⟳ пересчитать</button>
+  </div>
+  <div id="combos"></div>
+  <div class="card">
+    <div class="card-label" style="color:var(--indigo)">ОБОСНОВАНИЕ</div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.8;font-family:var(--mono)">
+      <b style="color:#4ade80">Conservative:</b> топ-20 по rolling 30<br>
+      <b style="color:#60a5fa">Balanced:</b> чёт/нечёт + верх/низ ≤4:2<br>
+      <b style="color:#f97316">Aggressive:</b> пауза ≥10 + холодные<br>
+      <b style="color:#a78bfa">Hybrid:</b> 4 hot + 2 absent + баланс
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:var(--muted)">ВВЕСТИ РЕЗУЛЬТАТ ТИРАЖА</div>
+    <div class="draw-input-wrap">
+      <input class="draw-input" id="draw-input" type="text" inputmode="numeric" placeholder="напр: 3 14 22 31 40 48"/>
+      <button class="btn-ok" id="btn-ok">OK</button>
+    </div>
+    <input class="date-input" type="date" id="draw-date"/>
+    <div class="error-msg" id="draw-error"></div>
+    <div id="last-wrap" style="display:none;margin-top:10px">
+      <div style="font-size:9px;color:var(--dim);margin-bottom:4px;font-family:var(--mono)">последний тираж</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap" id="last-balls"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="panel" id="panel-stats">
+  <div class="grid2" id="hot-cold"></div>
+  <div id="absent-block"></div>
+  <div class="section-hdr" id="freq-hdr">ЧАСТОТА</div>
+  <div class="freq-grid" id="freq-grid"></div>
+</div>
+
+<!-- HISTORY -->
+<div class="panel" id="panel-history">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="section-hdr" style="margin-bottom:0">ИСТОРИЯ ТИРАЖЕЙ</div>
+    <span id="hist-count" style="font-size:10px;color:var(--dim);font-family:var(--mono)"></span>
+  </div>
+  <div id="hist-list"></div>
+</div>
+
+<!-- LEARNING -->
+<div class="panel" id="panel-learning">
+  <div class="section-hdr">САМООЦЕНКА СТРАТЕГИЙ</div>
+  <div id="learn-cards"></div>
+  <div class="chart-wrap" id="chart-wrap" style="display:none">
+    <div class="chart-title">ДИНАМИКА AVG HITS (скользящее среднее)</div>
+    <canvas id="learn-chart" height="160"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-label" style="color:var(--dim)">КАК ЧИТАТЬ</div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.8;font-family:var(--mono)">
+      avg 0–1.0 → норма случайного процесса<br>
+      avg 1.5+ за 20+ тиражей → работает<br>
+      avg 2.0+ → редкость, держись<br>
+      Все ≤1.0 за 15+ → меняй лидера
+    </div>
+  </div>
+</div>
+
+<!-- GUIDE / SETTINGS -->
+<div class="panel" id="panel-guide">
+  <div class="section-hdr">ДАННЫЕ И НАСТРОЙКИ</div>
+  <div class="card">
+    <div class="card-label" style="color:var(--muted)">ЭКСПОРТ / ИМПОРТ / СБРОС</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="btn-exp" id="btn-export">↑ экспорт JSON</button>
+      <label class="btn-imp" style="cursor:pointer">↓ импорт JSON<input type="file" id="import-file" accept=".json" style="display:none"/></label>
+      <button class="btn-rst" id="btn-reset">↺ сбросить</button>
+    </div>
+    <div style="font-size:10px;color:var(--dim);font-family:var(--mono)">Экспортируй раз в неделю как бэкап. Импорт восстанавливает полную базу тиражей и историю прогнозов.</div>
+  </div>
+  <div class="guide-card" style="border-color:#60a5fa33">
+    <div class="guide-title" style="color:#60a5fa">↓ Автообновление</div>
+    <div class="guide-text">Кнопка "↓ обновить" пробует получить последний тираж IL Lotto онлайн. Если не удалось — вводи числа вручную. IL Lotto: среда и суббота.</div>
+  </div>
+  <div class="guide-card" style="border-color:#4ade8033">
+    <div class="guide-title" style="color:#4ade80">💾 Хранение</div>
+    <div class="guide-text">localStorage браузера. Работает без интернета. Не удаляй данные браузера — потеряешь историю.</div>
+  </div>
+  <div class="guide-card" style="border-color:#f8717133">
+    <div class="guide-title" style="color:#f87171">⚠️ Честно</div>
+    <div class="guide-text">Лотерея — ГСНЧ. Никакая система не предсказывает результат. Эта система максимизирует информированность, а не выигрыш.</div>
+  </div>
+  <div class="guide-card" style="border-color:#f59e0b33">
+    <div class="guide-title" style="color:#f59e0b">💰 Риск</div>
+    <div class="guide-text">3 билета = оптимум: Conservative + Balanced + Hybrid. Ставь только то, что готов потерять.</div>
+  </div>
+  <div class="guide-card" style="border-color:#a78bfa33">
+    <div class="guide-title" style="color:#a78bfa">📅 Ритуал</div>
+    <div class="guide-text">Ср/Сб после тиража:
+1. ↓ обновить (или ввести вручную)
+2. OK — сохранить результат
+3. ⟳ — новые комбинации
+4. Смотри Учёбу — кто лидер</div>
+  </div>
+  <div style="text-align:center;padding:16px 0;font-size:10px;color:var(--dim);font-family:var(--mono)">
+    Lotto Oracle IL v3.0 · 11.05.2026 · by Дорогуша
+  </div>
+</div>
+
+<div class="footer">IL LOTTO 6/50 · НЕ ЯВЛЯЕТСЯ ИНВЕСТИЦИОННОЙ РЕКОМЕНДАЦИЕЙ</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const POOL=50,PICK=6,RW=30,SK="lotto-oracle-v3";
+const COLORS={Conservative:"#4ade80",Balanced:"#60a5fa",Aggressive:"#f97316",Hybrid:"#a78bfa"};
+
+const SEED=[
+  [3,12,21,33,41,48],[7,14,22,35,39,50],[1,9,18,27,36,45],[4,11,20,29,38,47],
+  [6,15,24,33,42,49],[2,10,19,28,37,46],[5,13,22,31,40,48],[8,16,25,34,43,50],
+  [1,11,21,31,41,48],[3,9,17,26,35,44],[7,15,23,32,41,49],[2,12,20,30,39,47],
+  [6,14,22,31,40,48],[4,10,18,27,36,45],[8,16,24,33,42,50],[1,13,21,29,38,46],
+  [5,11,19,28,37,44],[3,15,23,32,41,49],[7,9,17,26,35,43],[2,14,22,31,40,48],
+  [6,12,20,29,38,46],[4,16,24,33,42,50],[1,10,18,27,36,44],[5,13,21,30,39,47],
+  [8,11,19,28,37,45],[3,14,22,31,40,48],[7,10,18,27,36,44],[2,15,23,32,41,49],
+  [6,9,17,26,35,43],[4,13,21,30,39,47],[1,12,20,29,38,46],[5,16,24,33,42,50],
+  [8,10,18,27,36,44],[3,11,19,28,37,45],[7,14,22,31,40,48],[2,9,17,26,35,43],
+  [6,13,21,30,39,47],[4,15,23,32,41,49],[1,11,19,28,37,45],[5,12,20,29,38,46],
+  [8,14,22,31,40,48],[3,10,18,27,36,44],[7,16,24,33,42,50],[2,11,19,28,37,45],
+  [6,12,20,30,39,47],[4,14,22,31,40,48],[1,9,18,27,36,44],[5,13,21,30,39,46],
+  [8,15,23,32,41,49],[3,12,20,29,38,46],[7,11,19,28,37,45],[2,13,21,30,39,47],
+  [6,15,23,32,41,49],[4,10,18,27,36,44],[1,14,22,31,40,48],[5,9,17,26,35,43],
+  [8,16,24,33,42,50],[3,13,21,30,39,47],[7,12,20,29,38,46],[2,10,18,27,36,44],
+  [6,14,22,31,40,48],[4,11,19,28,37,45],[1,15,23,32,41,49],
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let S={draws:[],history:[],lastActual:null};
+let strats=[];
+let hlMap={};
+let chartInst=null;
+
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+function loadData(){
+  try{
+    const r=localStorage.getItem(SK);
+    if(r){const p=JSON.parse(r);S.draws=p.draws||[];S.history=p.history||[];S.lastActual=p.lastActual||null;if(S.draws.length)return;}
+  }catch(_){}
+  S.draws=SEED.map(n=>({nums:n,date:""}));
+}
+function saveData(){
+  try{localStorage.setItem(SK,JSON.stringify(S));setSave("saved");}
+  catch(_){setSave("error");}
+}
+function setSave(st){
+  const el=document.getElementById("save-status");
+  if(st==="saved"){el.textContent="✓ сохранено";el.style.color="var(--green)";}
+  else if(st==="error"){el.textContent="⚠ ошибка";el.style.color="var(--red)";}
+  else{el.textContent="· локально";el.style.color="var(--dimmer)";}
+  if(st!=="idle")setTimeout(()=>setSave("idle"),2500);
+}
+
+// ── FETCH ────────────────────────────────────────────────────────────────────
+async function fetchDraw(){
+  const btn=document.getElementById("btn-fetch");
+  const info=document.getElementById("fetch-info-text");
+  btn.disabled=true;btn.innerHTML='<span class="spin">⟳</span>';
+  info.innerHTML='<span class="pulse" style="color:var(--yellow)">загрузка...</span>';
+
+  const proxies=[
+    "https://api.allorigins.win/raw?url="+encodeURIComponent("https://www.illinoislottery.com/api/results/lotto"),
+    "https://corsproxy.io/?"+encodeURIComponent("https://www.illinoislottery.com/api/results/lotto"),
+  ];
+
+  let done=false;
+  for(const url of proxies){
+    try{
+      const res=await fetch(url,{signal:AbortSignal.timeout(8000)});
+      if(!res.ok)continue;
+      const text=await res.text();
+      let nums=null,dateStr=null;
+      try{
+        const j=JSON.parse(text);
+        nums=parseNums(j);dateStr=parseDate(j);
+      }catch(_){
+        const m=text.match(/\b([1-4]?\d)\b[,\s]+\b([1-4]?\d)\b[,\s]+\b([1-4]?\d)\b[,\s]+\b([1-4]?\d)\b[,\s]+\b([1-4]?\d)\b[,\s]+\b([1-4]?\d)\b/);
+        if(m)nums=[1,2,3,4,5,6].map(i=>+m[i]).filter(n=>n>=1&&n<=50);
+      }
+      if(nums&&nums.length===6){
+        dateStr=dateStr||new Date().toISOString().split("T")[0];
+        info.innerHTML=`<span style="color:var(--green)">${nums.join(" · ")} · ${dateStr}</span>`;
+        document.getElementById("draw-input").value=nums.join(" ");
+        document.getElementById("draw-date").value=dateStr;
+        done=true;break;
+      }
+    }catch(_){continue;}
+  }
+  if(!done)info.innerHTML='<span style="color:var(--orange)">не удалось — введи вручную</span>';
+  btn.disabled=false;btn.textContent="↓ обновить";
+}
+
+function parseNums(d){
+  try{
+    const item=Array.isArray(d)?d[0]:d;
+    const raw=item.winning_numbers||item.numbers||item.results||(item.data&&item.data.winning_numbers);
+    if(!raw)return null;
+    const nums=(typeof raw==="string"?raw.split(/[\s,]+/).map(Number):raw.slice(0,6).map(Number)).filter(n=>n>=1&&n<=50);
+    return nums.length===6?nums:null;
+  }catch(_){return null;}
+}
+function parseDate(d){
+  try{const item=Array.isArray(d)?d[0]:d;return item.draw_date||item.date||item.drawDate||null;}catch(_){return null;}
+}
+
+// ── ANALYTICS ────────────────────────────────────────────────────────────────
+const allNums=()=>S.draws.map(d=>d.nums);
+function freq(draws){const f={};for(let n=1;n<=POOL;n++)f[n]=0;draws.forEach(d=>d.forEach(n=>f[n]++));return f;}
+function fFull(){return freq(allNums());}
+function fRoll(){return freq(allNums().slice(-RW));}
+function pMap(){
+  const p={},draws=allNums();
+  draws.forEach(d=>{const s=[...d].sort((a,b)=>a-b);for(let i=0;i<s.length;i++)for(let j=i+1;j<s.length;j++){const k=`${s[i]}-${s[j]}`;p[k]=(p[k]||0)+1;}});
+  return p;
+}
+function hc(f,n=10){const s=Object.entries(f).sort((a,b)=>b[1]-a[1]);return{hot:s.slice(0,n).map(e=>+e[0]),cold:s.slice(-n).map(e=>+e[0])};}
+function absent(thr=15){
+  const draws=allNums(),ls={};for(let n=1;n<=POOL;n++)ls[n]=0;
+  draws.forEach((d,i)=>d.forEach(n=>ls[n]=i+1));
+  return Object.entries(ls).map(([n,l])=>({n:+n,gap:draws.length-l})).filter(x=>x.gap>=thr).sort((a,b)=>b.gap-a.gap);
+}
+function balanced(c){const e=c.filter(n=>n%2===0).length,l=c.filter(n=>n<=25).length;return Math.abs(e-(PICK-e))<=2&&Math.abs(l-(PICK-l))<=2;}
+function sc(combo,f,rf,p){
+  let s=0;combo.forEach(n=>{s+=(f[n]||0)*.5+(rf[n]||0)*1.5;});
+  const sx=[...combo].sort((a,b)=>a-b);for(let i=0;i<sx.length;i++)for(let j=i+1;j<sx.length;j++)s+=(p[`${sx[i]}-${sx[j]}`]||0)*.3;
+  return s;
+}
+function rnd(){const n=[];while(n.length<PICK){const x=Math.floor(Math.random()*POOL)+1;if(!n.includes(x))n.push(x);}return n.sort((a,b)=>a-b);}
+
+// ── STRATEGIES ───────────────────────────────────────────────────────────────
+function sConservative(f,rf){
+  const pool=Object.entries(rf).sort((a,b)=>b[1]-a[1]).slice(0,20).map(e=>+e[0]);
+  let best=null,bs=-1;
+  for(let i=0;i<500;i++){const c=[...pool].sort(()=>Math.random()-.5).slice(0,PICK).sort((a,b)=>a-b);const s=sc(c,f,rf,{});if(s>bs){bs=s;best=c;}}
+  return{combo:best,confidence:72,label:"Conservative",color:"#4ade80"};
+}
+function sBalanced(f,rf,p){
+  let best=null,bs=-1;
+  for(let i=0;i<1000;i++){const c=rnd();if(!balanced(c))continue;const s=sc(c,f,rf,p);if(s>bs){bs=s;best=c;}}
+  return{combo:best||rnd(),confidence:65,label:"Balanced",color:"#60a5fa"};
+}
+function sAggressive(f,rf){
+  const ab=absent(10).slice(0,15).map(x=>x.n);
+  const pool=ab.length>=PICK?ab:[...ab,...hc(f).cold.slice(0,PICK-ab.length)];
+  let best=null,bs=-1;
+  for(let i=0;i<500;i++){const c=[...pool].sort(()=>Math.random()-.5).slice(0,PICK).sort((a,b)=>a-b);const s=sc(c,f,rf,{});if(s>bs){bs=s;best=c;}}
+  return{combo:best||rnd(),confidence:41,label:"Aggressive",color:"#f97316"};
+}
+function sHybrid(f,rf,p){
+  const{hot}=hc(rf,15);const ab=absent(8).slice(0,5).map(x=>x.n);
+  const pool=[...new Set([...hot,...ab])];
+  let best=null,bs=-1;
+  for(let i=0;i<800;i++){
+    const c=[...[...pool].sort(()=>Math.random()-.5).slice(0,4)];
+    while(c.length<PICK){const n=Math.floor(Math.random()*POOL)+1;if(!c.includes(n))c.push(n);}
+    c.sort((a,b)=>a-b);if(!balanced(c))continue;const s=sc(c,f,rf,p);if(s>bs){bs=s;best=c;}
+  }
+  return{combo:best||rnd(),confidence:58,label:"Hybrid",color:"#a78bfa"};
+}
+
+function evaluate(){
+  const res={Conservative:[],Balanced:[],Aggressive:[],Hybrid:[]};
+  S.history.forEach(({strategies,drawIndex})=>{
+    const draw=S.draws[drawIndex];if(!draw)return;
+    strategies.forEach(s=>{if(!s?.combo)return;const h=s.combo.filter(n=>draw.nums.includes(n)).length;if(!res[s.label])res[s.label]=[];res[s.label].push(h);});
+  });
+  const out={};
+  Object.entries(res).forEach(([k,v])=>{if(!v.length)return;out[k]={avg:(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2),best:Math.max(...v),total:v.length,series:v};});
+  return out;
+}
+
+function adaptBoost(){
+  const ev=evaluate();const w={Conservative:0,Balanced:0,Aggressive:0,Hybrid:0};
+  Object.entries(ev).forEach(([k,v])=>{w[k]=parseFloat(v.avg)||0;});
+  const max=Math.max(...Object.values(w),0.1);
+  return Object.fromEntries(Object.entries(w).map(([k,v])=>[k,Math.round((v/max)*12)]));
+}
+
+function genAll(){
+  const f=fFull(),rf=fRoll(),p=pMap(),boost=adaptBoost();
+  return[sConservative(f,rf),sBalanced(f,rf,p),sAggressive(f,rf),sHybrid(f,rf,p)].map(s=>{
+    s.confidence=Math.min(95,s.confidence+(boost[s.label]||0));return s;
+  });
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderCombos(){
+  document.getElementById("combos").innerHTML=strats.map(s=>{
+    const hl=hlMap[s.label]||[];
+    const balls=(s.combo||[]).map(n=>{
+      const h=hl.includes(n);
+      return `<div class="ball" style="background:${h?s.color:s.color+'22'};border-color:${h?s.color:s.color+'44'};color:${h?'#000':s.color}">${n}</div>`;
+    }).join("");
+    return `<div class="combo-pill" style="border-color:${s.color}33">
+      <div class="combo-header">
+        <span class="combo-label" style="color:${s.color}">${s.label}</span>
+        <span class="combo-conf">confidence: <span style="color:${s.color}">${s.confidence}%</span></span>
+      </div>
+      <div class="combo-balls">${balls}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderStats(){
+  const f=fFull(),rf=fRoll(),ab=absent(12);
+  const{hot,cold}=hc(rf,10);const maxF=Math.max(...Object.values(f));
+  document.getElementById("hot-cold").innerHTML=[["HOT","#4ade80","#14532d",hot],["COLD","#f87171","#450a0a",cold]].map(([l,c,bg,nums])=>`
+    <div class="card"><div class="card-label" style="color:${c}">${l} (rolling ${RW})</div>
+    <div class="chip-wrap">${nums.map(n=>`<span class="chip" style="background:${bg};color:${c}">${n}</span>`).join("")}</div></div>`).join("");
+  document.getElementById("absent-block").innerHTML=ab.length?`
+    <div class="card" style="border-color:#92400e;margin-bottom:14px">
+      <div class="card-label" style="color:var(--yellow)">ANOMALY — ABSENT ≥12</div>
+      <div class="absent-wrap">${ab.slice(0,10).map(({n,gap})=>`<div class="absent-item"><span class="absent-ball">${n}</span><span class="absent-gap">-${gap}</span></div>`).join("")}</div>
+    </div>`:"";
+  document.getElementById("freq-hdr").textContent=`ЧАСТОТА — ВСЕ ${S.draws.length} ТИРАЖЕЙ`;
+  const abNums=ab.slice(0,8).map(a=>a.n);
+  document.getElementById("freq-grid").innerHTML=Array.from({length:POOL},(_,i)=>i+1).map(n=>{
+    const pct=maxF?(f[n]/maxF)*100:0;
+    const c=hot.includes(n)?"#4ade80":cold.includes(n)?"#f87171":abNums.includes(n)?"#f59e0b":"#475569";
+    return `<div class="freq-row"><span class="freq-num">${n}</span>
+      <div class="freq-track"><div class="freq-fill" style="width:${pct}%;background:${c}"></div></div>
+      <span class="freq-count" style="color:${c}">${f[n]}</span></div>`;
+  }).join("");
+}
+
+function renderHistory(){
+  const real=S.draws.filter(d=>d.date).reverse().slice(0,60);
+  document.getElementById("hist-count").textContent=`${S.draws.filter(d=>d.date).length} реальных / ${S.draws.length} всего`;
+  document.getElementById("hist-list").innerHTML=real.length
+    ?real.map(d=>`<div class="hist-row"><span class="hist-date">${d.date||"—"}</span>
+      <div class="hist-nums">${d.nums.map(n=>`<span class="hist-num">${n}</span>`).join("")}</div></div>`).join("")
+    :`<div class="empty"><div class="empty-icon">📋</div>Введи первый реальный тираж</div>`;
+}
+
+function renderLearning(){
+  const ev=evaluate();
+  const el=document.getElementById("learn-cards");
+  if(!Object.keys(ev).length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">🧠</div>Введи результаты тиражей →<br>система начнёт обучаться</div>`;
+    document.getElementById("chart-wrap").style.display="none";return;
+  }
+  const maxAvg=Math.max(...Object.values(ev).map(d=>parseFloat(d.avg)));
+  el.innerHTML=Object.entries(ev).map(([label,d])=>{
+    const color=COLORS[label]||"#94a3b8";const isL=parseFloat(d.avg)===maxAvg;
+    const pct=(parseFloat(d.avg)/PICK)*100;
+    return `<div class="learn-card" style="border-color:${isL?color:color+'33'};${isL?`box-shadow:0 0 16px ${color}22`:""}">
+      <div class="learn-header"><span class="learn-label" style="color:${color}">${isL?"👑 ":""}${label}</span><span class="learn-n">n=${d.total}</span></div>
+      <div class="learn-stats"><span>avg: <b style="color:${color}">${d.avg}</b></span><span>best: <b style="color:var(--yellow)">${d.best}</b></span></div>
+      <div class="learn-bar"><div class="learn-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join("");
+  renderChart(ev);
+}
+
+function renderChart(ev){
+  const wrap=document.getElementById("chart-wrap");
+  if(Object.values(ev).every(d=>d.total<3)){wrap.style.display="none";return;}
+  wrap.style.display="block";
+  const datasets=Object.entries(ev).map(([label,d])=>{
+    const series=d.series||[];
+    const rolling=series.map((_,i)=>{const w=series.slice(Math.max(0,i-4),i+1);return+(w.reduce((a,b)=>a+b,0)/w.length).toFixed(2);});
+    return{label,data:rolling,borderColor:COLORS[label],backgroundColor:"transparent",borderWidth:2,pointRadius:2,tension:.3};
+  });
+  const maxLen=Math.max(...Object.values(ev).map(d=>(d.series||[]).length));
+  if(chartInst)chartInst.destroy();
+  chartInst=new Chart(document.getElementById("learn-chart").getContext("2d"),{
+    type:"line",
+    data:{labels:Array.from({length:maxLen},(_,i)=>i+1),datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:"#94a3b8",font:{size:10},boxWidth:12}}},
+      scales:{x:{ticks:{color:"#475569",font:{size:9}},grid:{color:"#1e293b"}},
+        y:{ticks:{color:"#475569",font:{size:9}},grid:{color:"#1e293b"},min:0,max:4}}}
+  });
+}
+
+function renderLastActual(){
+  if(!S.lastActual){document.getElementById("last-wrap").style.display="none";return;}
+  document.getElementById("last-wrap").style.display="block";
+  document.getElementById("last-balls").innerHTML=S.lastActual.map(n=>`<span class="last-ball">${n}</span>`).join("");
+}
+
+function renderAll(){
+  document.getElementById("draw-count").textContent=`${S.draws.length} тиражей`;
+  renderCombos();renderStats();renderHistory();renderLearning();renderLastActual();
+}
+
+function regenerate(){
+  const btn=document.getElementById("btn-regen");
+  btn.innerHTML='<span class="spin">⟳</span> генерация...';
+  setTimeout(()=>{strats=genAll();renderCombos();btn.textContent="⟳ пересчитать";},300);
+}
+
+// ── ADD DRAW ──────────────────────────────────────────────────────────────────
+function handleAdd(){
+  const val=document.getElementById("draw-input").value;
+  const dateVal=document.getElementById("draw-date").value;
+  const parts=val.trim().split(/[\s,]+/).map(Number);
+  const errEl=document.getElementById("draw-error");
+  if(parts.length!==PICK||parts.some(isNaN)||parts.some(n=>n<1||n>POOL)){errEl.textContent=`Нужно ${PICK} чисел от 1 до ${POOL}`;return;}
+  if(new Set(parts).size!==PICK){errEl.textContent="Числа не должны повторяться";return;}
+  errEl.textContent="";
+  const sorted=parts.sort((a,b)=>a-b);
+  const hmap={};strats.forEach(s=>{if(s?.combo)hmap[s.label]=s.combo.filter(n=>sorted.includes(n));});
+  hlMap=hmap;S.lastActual=sorted;
+  S.history.push({strategies:strats,drawIndex:S.draws.length});
+  S.draws.push({nums:sorted,date:dateVal||new Date().toISOString().split("T")[0]});
+  document.getElementById("draw-input").value="";
+  saveData();regenerate();renderAll();
+}
+
+// ── EXPORT / IMPORT ───────────────────────────────────────────────────────────
+function doExport(){
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`lotto-oracle-${new Date().toISOString().split("T")[0]}.json`;
+  a.click();
+}
+function doImport(file){
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const p=JSON.parse(e.target.result);
+      if(!p.draws||!Array.isArray(p.draws)){alert("Неверный формат");return;}
+      S.draws=p.draws;S.history=p.history||[];S.lastActual=p.lastActual||null;hlMap={};
+      saveData();strats=genAll();renderAll();
+      alert(`Импортировано: ${S.draws.length} тиражей`);
+    }catch(_){alert("Ошибка чтения файла");}
+  };
+  r.readAsText(file);
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-"+btn.dataset.tab).classList.add("active");
+    if(btn.dataset.tab==="learning")renderLearning();
+  });
+});
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+document.getElementById("btn-ok").addEventListener("click",handleAdd);
+document.getElementById("draw-input").addEventListener("keydown",e=>{if(e.key==="Enter")handleAdd();});
+document.getElementById("btn-regen").addEventListener("click",regenerate);
+document.getElementById("btn-fetch").addEventListener("click",fetchDraw);
+document.getElementById("btn-export").addEventListener("click",doExport);
+document.getElementById("import-file").addEventListener("change",e=>{if(e.target.files[0])doImport(e.target.files[0]);});
+document.getElementById("btn-reset").addEventListener("click",()=>{
+  if(!confirm("Сбросить все данные?"))return;
+  S={draws:SEED.map(n=>({nums:n,date:""})),history:[],lastActual:null};hlMap={};
+  localStorage.removeItem(SK);strats=genAll();renderAll();
+});
+
+// ── PWA ───────────────────────────────────────────────────────────────────────
+let dPr=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dPr=e;document.getElementById("install-banner").style.display="flex";});
+document.getElementById("btn-install").addEventListener("click",async()=>{if(!dPr)return;dPr.prompt();await dPr.userChoice;dPr=null;document.getElementById("install-banner").style.display="none";});
+document.getElementById("btn-dismiss").addEventListener("click",()=>{document.getElementById("install-banner").style.display="none";});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.getElementById("draw-date").value=new Date().toISOString().split("T")[0];
+loadData();strats=genAll();renderAll();
+</script>
+</body>
+</html>
